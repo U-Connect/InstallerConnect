@@ -48,9 +48,6 @@
     self.edgesForExtendedLayout = UIRectEdgeNone;
     
     //[self.loadingIndicator startAnimating];
-    self.mbProgressHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    self.mbProgressHUD.labelText = @"Loading...";
-    self.mbProgressHUD.delegate = self;
     [self getAssignedSiteRecords];
 }
 
@@ -75,6 +72,9 @@
 
 - (void)getAssignedSiteRecords {
     if([ICUtilities isConnected]) {
+        self.mbProgressHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        self.mbProgressHUD.labelText = @"Loading...";
+        self.mbProgressHUD.delegate = self;
         ICServicesHelper *servicesHelper = [ICServicesHelper getInstance];
         __block ICJSONResponse *jsonResponse = nil;
         BOOL (^serviceBlock)() = ^() {
@@ -131,7 +131,7 @@
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     if(buttonIndex == 1) {
         //Retry button pressed.
-        [self.loadingIndicator startAnimating];
+        //[self.loadingIndicator startAnimating];
         [self getAssignedSiteRecords];
     }
 }

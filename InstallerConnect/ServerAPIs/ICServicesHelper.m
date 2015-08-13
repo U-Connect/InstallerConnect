@@ -304,9 +304,10 @@ NSInteger HTTP_UNAUTHORIZED = 401;
 
 - (ICJSONResponse*)readBarcodes :(NSData*)imageData {
     //NSLog(@"readBarcodes ");
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"https://wabr.inliteresearch.com/barcodes"]];
-    [request setValue:@"nGnui0QC0hCCIxzxiqvTPJG3pssKSJhg" forHTTPHeaderField:@"Authorization"];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"http://54.67.87.34/wabr/barcodes"]];
+    //[request setValue:@"nGnui0QC0hCCIxzxiqvTPJG3pssKSJhg" forHTTPHeaderField:@"Authorization"];
     [request setValue:@"103" forHTTPHeaderField:@"tbr"];
+    //[request setValue:@"Code128" forHTTPHeaderField:@"types"];
     [request setCachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
     [request setHTTPShouldHandleCookies:NO];
     [request setTimeoutInterval:120];
@@ -355,7 +356,7 @@ NSInteger HTTP_UNAUTHORIZED = 401;
         return jsonResponse;
     }
     NSString *json = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
-    NSLog(@"readBarcodes response ==> %@", json);
+    NSLog(@"readBarcodes response");//NSLog(@"readBarcodes response ==> %@", json);
     NSError *parsingError;
     ICBarCodes* barcodes = [[ICBarCodes alloc] initWithString:json error:&parsingError];
     jsonResponse.data = barcodes;

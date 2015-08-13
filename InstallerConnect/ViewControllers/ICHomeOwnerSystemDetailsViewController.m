@@ -17,6 +17,7 @@
 #import "UIImage+fixOrientation.h"
 #import "ICSegmentedControl.h"
 #import "UILabel+Boldify.h"
+#import "UIImage+imageByNormalizingOrientation.h"
 
 
 #define SCAN_ALERT_TAG 1
@@ -127,6 +128,8 @@
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
+    NSLog(@"didReceiveMemoryWarning : YES");
+    [[NSURLCache sharedURLCache] removeAllCachedResponses];
     // Dispose of any resources that can be recreated.
 }
 
@@ -415,6 +418,9 @@
     self.nRows = 0;
     self.nColumns = 0;
     [self.multiDimBarcodes removeAllObjects];
+    self.base64ImageData = nil;
+    self.installtionMapImage = nil;
+    self.icBarCodes = nil;
     if(self.imagePicker == nil) {
         self.imagePicker = [[UIImagePickerController alloc] init];
         self.imagePicker.delegate = self;
@@ -440,7 +446,7 @@
         self.imagePicker.cameraViewTransform = CGAffineTransformMakeTranslation(0, (screenSize.height - cameraHeight) / 2.0);
         self.imagePicker.cameraViewTransform = CGAffineTransformScale(self.imagePicker.cameraViewTransform, scale, scale);
     }
-    [self startDeviceMotionUpdates];
+    //[self startDeviceMotionUpdates];
     [self presentViewController:self.imagePicker animated:YES completion:NULL];
 }
 
@@ -495,9 +501,9 @@
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
-    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
-    NSLog (@"imagePickerController dOrientation = %ld, iOrientation = %ld",self.deviceOrientation, orientation);
-    [self stopDeviceMotionUpdates];
+    //UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+    //NSLog (@"imagePickerController dOrientation = %ld, iOrientation = %ld",self.deviceOrientation, orientation);
+    //[self stopDeviceMotionUpdates];
     [picker dismissViewControllerAnimated:YES completion:NULL];
     self.mbProgressHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     self.mbProgressHUD.labelText = @"Reading Barcodes";
@@ -505,7 +511,7 @@
     self.mbProgressHUD.dimBackground = YES;
     UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
     NSLog (@"image orientation = %ld",(long)image.imageOrientation);
-    image = [image fixOrientation:image.imageOrientation];//[image fixOrientation:self.deviceOrientation]
+    image = [image imageByNormalizingOrientation];//[image fixOrientation:self.deviceOrientation]
     NSData *imageData = UIImageJPEGRepresentation(image, 0.5);
     UIImage *jpegImage=[UIImage imageWithData:imageData];
     self.installtionMapImage = jpegImage;
@@ -522,17 +528,18 @@
     };
     
     void (^mainBlock)() = ^() {
-        [self.mbProgressHUD hide:YES];//[self.loadingIndicator stopAnimating];
         if(jsonResponse.success) {
             self.icBarCodes = (ICBarCodes*)jsonResponse.data;
             if(self.icBarCodes.barcodes.count > 0) {
                 self.base64ImageData = [imageData base64EncodedStringWithOptions:0];
+                self.installtionMapImage = [self imageByDrawingRectOnBarCodes:self.installtionMapImage];
                 self.readBarCodes = [[NSMutableArray alloc] initWithArray:self.icBarCodes.barcodes copyItems:YES];
                 [self showViewAlert];
             }
             else {
                 [self showNoBarcodesAlert];
             }
+            [self.mbProgressHUD hide:YES];//[self.loadingIndicator stopAnimating];
         }
         else {
             
@@ -540,6 +547,52 @@
     };
     
     [AsyncInterfaceTask dispatchBackgroundTask:serviceBlock withInterfaceUpdate:mainBlock];
+}
+
+- (UIImage *)imageByDrawingRectOnBarCodes:(UIImage *)image
+{
+    // begin a graphics context of sufficient size
+    UIGraphicsBeginImageContext(image.size);
+    
+    // draw original image into the context
+    [image drawAtPoint:CGPointZero];
+    
+    // get the context for CoreGraphics
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    UIColor * whiteColor = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:1.0];
+    UIColor * lightGrayColor = [UIColor colorWithRed:230.0/255.0 green:230.0/255.0 blue:230.0/255.0 alpha:1.0];
+    UIColor * redColor = [UIColor colorWithRed:1.0 green:0.0 blue:0.0 alpha:1.0]; // NEW
+    CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
+    drawLinearGradientColorForImage(context, imageRect, whiteColor.CGColor, lightGrayColor.CGColor);
+    
+    for(ICBarCode *icBarocde in self.icBarCodes.barcodes) {
+        
+        CGRect strokeRect = CGRectMake(icBarocde.left - 2, icBarocde.top - 1,
+                                       icBarocde.right - icBarocde.left + 4,
+                                       icBarocde.bottom - icBarocde.top + 2);
+        strokeRect = CGRectInset(strokeRect, 1, 1);
+        CGContextSetStrokeColorWithColor(context, redColor.CGColor);
+        CGContextSetLineWidth(context, 8);
+        CGContextStrokeRect(context, strokeRect);
+    }
+    
+    // make image out of bitmap context
+    UIImage *retImage = UIGraphicsGetImageFromCurrentImageContext();
+    // free the context
+    UIGraphicsEndImageContext();
+    
+    return retImage;
+}
+
+void drawLinearGradientColorForImage(CGContextRef context, CGRect rect, CGColorRef startColor, CGColorRef endColor)
+{
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGFloat locations[] = { 0.0, 1.0 };
+    
+    NSArray *colors = @[(__bridge id) startColor, (__bridge id) endColor];
+    
+    CGGradientRef gradient = CGGradientCreateWithColors(colorSpace, (__bridge CFArrayRef) colors, locations);
+    
 }
 
 NSComparator comparatorBlock = ^(ICBarCode *icBarcode1, ICBarCode *icBarcode2) {
@@ -574,7 +627,7 @@ NSComparator comparatorBlock = ^(ICBarCode *icBarcode1, ICBarCode *icBarcode2) {
     for(ICBarCode *icBarCode in self.readBarCodes) {
         if(icBarCode.left < (minSEBarCode.left + width)) {
             if((minSEBarCode.right - icBarCode.left) > (width/2) ) {
-                NSLog(@"index to delete = %lu", (unsigned long)index);
+                //NSLog(@"index to delete = %lu", (unsigned long)index);
                 [indexesToDelete addIndex:index];
                 [barCodesColumn addObject:icBarCode];
             }

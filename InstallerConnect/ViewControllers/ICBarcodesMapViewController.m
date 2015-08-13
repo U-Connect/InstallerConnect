@@ -51,7 +51,7 @@ static NSString *identifier = @"DataGridcell";
     self.imageScrollView.opaque = NO;
     self.imageScrollView.backgroundColor = [UIColor clearColor];
     
-    self.installtionMapImage = [self imageByDrawingRectOnImage:self.installtionMapImage];//[self addBarcodeBorders];
+    //self.installtionMapImage = [self imageByDrawingRectOnImage:self.installtionMapImage];//[self addBarcodeBorders];
     
     UIImageView *imageView = [[UIImageView alloc] initWithImage:self.installtionMapImage];
     imageView.frame = self.installationMapView.bounds;
@@ -65,6 +65,7 @@ static NSString *identifier = @"DataGridcell";
     [self updateBarCodesToUpload];
 
 }
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -81,8 +82,9 @@ static NSString *identifier = @"DataGridcell";
     
 }
 
+/*
 - (void)addBarcodeBorders {
-   /* NSInteger navBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height + self.navigationController.navigationBar.frame.size.height;
+    NSInteger navBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height + self.navigationController.navigationBar.frame.size.height;
     CGRect screenRect = [[UIScreen mainScreen] bounds];
     CGFloat widthScale = self.installtionMapImage.size.width / screenRect.size.width;
     CGFloat heightScale = self.installtionMapImage.size.height / (screenRect.size.height - navBarHeight);
@@ -96,7 +98,7 @@ static NSString *identifier = @"DataGridcell";
                                        icBarocde.right - icBarocde.left,
                                        icBarocde.bottom - icBarocde.top);
         self.installtionMapImage = [self imageByDrawingRectOnImage:self.installtionMapImage rect:strokeRect];
-    }*/
+    }
     
 }
 
@@ -145,6 +147,7 @@ void drawLinearGradientColor(CGContextRef context, CGRect rect, CGColorRef start
     CGGradientRef gradient = CGGradientCreateWithColors(colorSpace, (__bridge CFArrayRef) colors, locations);
     
 }
+ */
 
 - (void)updateBarCodesToUpload {
     self.barCodesToUpload = @"";
@@ -238,6 +241,7 @@ void drawLinearGradientColor(CGContextRef context, CGRect rect, CGColorRef start
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     if(alertView.tag == SUCCESS_ALERT_TAG) {
         if(buttonIndex == 0) {
+            [self resetBarcodeData];
             [self.hoVCdelegate barCodesUploaded:self.barCodesToUpload];
             [self.navigationController popViewControllerAnimated:YES];
         }
@@ -304,6 +308,12 @@ void drawLinearGradientColor(CGContextRef context, CGRect rect, CGColorRef start
 - (NSString*)titleForColumn:(int)columnNumber
 {
     return [@(columnNumber +1) stringValue];
+}
+
+- (void)resetBarcodeData {
+    self.base64ImageData = nil;
+    self.installtionMapImage = nil;
+    self.icBarCodes = nil;
 }
 
 /*

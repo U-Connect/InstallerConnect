@@ -116,7 +116,7 @@ NSInteger HTTP_UNAUTHORIZED = 401;
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
     
-    [request setValue:@"no-cache" forHTTPHeaderField:@"cache-control"];
+    //[request setValue:@"no-cache" forHTTPHeaderField:@"cache-control"];
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     [request setValue:self.userLogin.oktaSessionId forHTTPHeaderField:@"x-okta-session-id"];
     [request setHTTPMethod:@"GET"];
@@ -158,7 +158,7 @@ NSInteger HTTP_UNAUTHORIZED = 401;
     NSString *url = [NSString stringWithFormat:@"%@/%@/%@", DEFAULT_HOST, SITE_DETAILS_SERVICE, homeOwnerId];
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
-    [request setValue:@"no-cache" forHTTPHeaderField:@"cache-control"];
+    //[request setValue:@"no-cache" forHTTPHeaderField:@"cache-control"];
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     [request setValue:self.userLogin.oktaSessionId forHTTPHeaderField:@"x-okta-session-id"];
     [request setHTTPMethod:@"GET"];

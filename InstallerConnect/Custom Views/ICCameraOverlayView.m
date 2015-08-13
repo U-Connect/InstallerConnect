@@ -77,7 +77,7 @@
  */
 
 - (void) takePhoto {
-    NSLog (@"device orientation = %ld",[UIApplication sharedApplication].statusBarOrientation);
+    NSLog (@"device orientation = %ld",(long)[UIApplication sharedApplication].statusBarOrientation);
     [self.imagePicker takePicture];
     //NSLog(@"takePicture");
 }

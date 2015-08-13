@@ -55,15 +55,17 @@ static NSString *identifier = @"DataGridcell";
     
     UIImageView *imageView = [[UIImageView alloc] initWithImage:self.installtionMapImage];
     imageView.frame = self.installationMapView.bounds;
-    imageView.contentMode = UIViewContentModeScaleToFill;
+    imageView.contentMode = UIViewContentModeScaleAspectFit;
     [self.installationMapView addSubview:imageView];
     
     UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:TITLE_UPLOAD style:UIBarButtonItemStylePlain target:self action:@selector(uploadBarcodes)];
     self.navigationItem.rightBarButtonItem = rightButton;
     self.navigationItem.rightBarButtonItem.enabled = YES;
     
-    [self updateBarCodesToUpload];
-
+    UITapGestureRecognizer *doubleTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(scrollViewDoubleTapped:)];
+    doubleTapRecognizer.numberOfTapsRequired = 2;
+    doubleTapRecognizer.numberOfTouchesRequired = 1;
+    [self.imageScrollView addGestureRecognizer:doubleTapRecognizer];
 }
 
 
@@ -80,6 +82,50 @@ static NSString *identifier = @"DataGridcell";
 - (void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(CGFloat)scale
 {
     
+}
+
+- (void)scrollViewDoubleTapped:(UITapGestureRecognizer*)recognizer {
+    if(self.imageScrollView.zoomScale > 1.0f) {
+        self.imageScrollView.zoomScale = self.imageScrollView.minimumZoomScale;
+    }
+    else {
+        self.imageScrollView.zoomScale = 2.0f;
+    }
+    
+    // 1
+    CGPoint pointInView = [recognizer locationInView:self.installationMapView];
+    // 3
+    CGSize scrollViewSize = self.imageScrollView.bounds.size;
+    
+    CGFloat w = scrollViewSize.width / self.imageScrollView.zoomScale;
+    CGFloat h = scrollViewSize.height / self.imageScrollView.zoomScale;
+    CGFloat x = pointInView.x - (w / 2.0f);
+    CGFloat y = pointInView.y - (h / 2.0f);
+    
+    CGRect rectToZoomTo = CGRectMake(x, y, w, h);
+    
+    // 4
+    [self.imageScrollView zoomToRect:rectToZoomTo animated:YES];
+    [self centerScrollViewContents];
+}
+
+- (void)centerScrollViewContents {
+    CGSize boundsSize = self.imageScrollView.bounds.size;
+    CGRect contentsFrame = self.installationMapView.frame;
+    
+    if (contentsFrame.size.width < boundsSize.width) {
+        contentsFrame.origin.x = (boundsSize.width - contentsFrame.size.width) / 2.0f;
+    } else {
+        contentsFrame.origin.x = 0.0f;
+    }
+    
+    if (contentsFrame.size.height < boundsSize.height) {
+        contentsFrame.origin.y = (boundsSize.height - contentsFrame.size.height) / 2.0f;
+    } else {
+        contentsFrame.origin.y = 0.0f;
+    }
+    
+    self.installationMapView.frame = contentsFrame;
 }
 
 /*

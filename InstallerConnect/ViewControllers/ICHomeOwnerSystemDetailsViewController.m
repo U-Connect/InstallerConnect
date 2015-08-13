@@ -510,13 +510,11 @@
     self.mbProgressHUD.delegate = self;
     self.mbProgressHUD.dimBackground = YES;
     UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
-    NSLog (@"image orientation = %ld",(long)image.imageOrientation);
     image = [image imageByNormalizingOrientation];//[image fixOrientation:self.deviceOrientation]
     NSData *imageData = UIImageJPEGRepresentation(image, 0.5);
-    UIImage *jpegImage=[UIImage imageWithData:imageData];
-    self.installtionMapImage = jpegImage;
-    UIImageWriteToSavedPhotosAlbum(jpegImage, nil, nil, nil);
-    NSLog(@"image width = %f , height = %f", jpegImage.size.width,jpegImage.size.height);
+    self.installtionMapImage = [UIImage imageWithData:imageData];
+    UIImageWriteToSavedPhotosAlbum(self.installtionMapImage, nil, nil, nil);
+    NSLog(@"image width = %f , height = %f", self.installtionMapImage.size.width,self.installtionMapImage.size.height);
     [self readBarcodes:imageData];
 }
 

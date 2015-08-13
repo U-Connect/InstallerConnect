@@ -66,6 +66,8 @@ static NSString *identifier = @"DataGridcell";
     doubleTapRecognizer.numberOfTapsRequired = 2;
     doubleTapRecognizer.numberOfTouchesRequired = 1;
     [self.imageScrollView addGestureRecognizer:doubleTapRecognizer];
+    
+    [self updateBarCodesToUpload];
 }
 
 

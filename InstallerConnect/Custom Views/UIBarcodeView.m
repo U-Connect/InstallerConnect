@@ -38,7 +38,9 @@ void drawLinearGradient(CGContextRef context, CGRect rect, CGColorRef startColor
     
     NSArray *colors = @[(__bridge id) startColor, (__bridge id) endColor];
     
-    CGGradientCreateWithColors(colorSpace, (__bridge CFArrayRef) colors, locations);
+    CGGradientRef gradientRef =  CGGradientCreateWithColors(colorSpace, (__bridge CFArrayRef) colors, locations);
+    CGColorSpaceRelease(colorSpace);
+     CGGradientRelease(gradientRef);
     
     // More coming...
 }

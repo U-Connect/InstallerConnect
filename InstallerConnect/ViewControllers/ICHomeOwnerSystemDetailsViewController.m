@@ -589,7 +589,9 @@ void drawLinearGradientColorForImage(CGContextRef context, CGRect rect, CGColorR
     
     NSArray *colors = @[(__bridge id) startColor, (__bridge id) endColor];
     
-    CGGradientRef gradient = CGGradientCreateWithColors(colorSpace, (__bridge CFArrayRef) colors, locations);
+    CGGradientRef gradientRef =  CGGradientCreateWithColors(colorSpace, (__bridge CFArrayRef) colors, locations);
+    CGColorSpaceRelease(colorSpace);
+    CGGradientRelease(gradientRef);
     
 }
 
